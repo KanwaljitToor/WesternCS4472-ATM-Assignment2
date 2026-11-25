@@ -1,8 +1,8 @@
 # CS4472 - Assignment 2: White Box Testing
 
-## 1 Withdrawal
+## 1. Withdrawal
 
-### 1.1 Process and Assumption
+### 1.1 Process and Assumptions
 
 ### 1.2 Analysis Artifact: Slice
 
@@ -11,7 +11,6 @@
 ### 1.4 Test Results
 
 ### 1.5 Fault Localization
-
 
 
 ## 2. Deposit — DU-Path Testing
@@ -27,7 +26,6 @@
 ### 2.5 Fault Localization
 
 
-
 ## 3. Transfer — Basis Path Testing
 
 ### 3.1 Process and Assumptions
@@ -37,6 +35,8 @@ Basis path testing was performed on the `calculateTransferFee` method in the `ba
 The control-flow graph (CFG) was constructed by examining the existing Java implementation. Each decision and executable statement was assigned a unique node number, and conditional edges were labelled Yes or No to represent the outcome of each condition.
 
 The cyclomatic complexity was calculated to determine the required number of independent basis paths. Each basis path was then identified by tracing a sequence of nodes from the method entry to the return statement.
+
+Test inputs were selected to satisfy the conditions along each basis path. Parameterized JUnit tests were implemented in `TransferFeeTest.java` to execute and evaluate each test case independently.
 
 **Assumptions:**
 
@@ -49,12 +49,15 @@ The cyclomatic complexity was calculated to determine the required number of ind
 - Test inputs are selected to execute the corresponding basis path in the implementation.
 - Expected fees are calculated independently using the Assignment 2 business logic specification.
 - The method is tested directly without mocking external dependencies.
+- Representative values are selected above and below the decision thresholds.
+- Fees are not rounded to the nearest cent because the specification does not require rounding.
+- A tolerance of 0.0001 is used when comparing expected and actual fees to account for floating-point precision.
 
 ### 3.2 Analysis Artifact: Control-Flow Graph and Basis Paths
 
 #### Control-Flow Graph
 
-![Transfer Control-Flow Graph](images/transfer-cfg.png)
+![Transfer Control-Flow Graph](images/transfer-cfg.svg)
 
 #### Cyclomatic Complexity
 
@@ -113,66 +116,98 @@ The number of independent paths equals the cyclomatic complexity of the CFG, V(G
 
 ### 3.3 Test Cases
 
-Test cases are derived from the basis paths identified in Section 3.2. Inputs are selected to satisfy the conditions along each corresponding path. Expected fees are calculated using the Assignment 2 business logic specification.
+Test cases are derived from the basis paths identified in Section 3.2. Inputs are selected to satisfy the conditions along each corresponding path.
+
+Transfer amounts of $50 and $200 are used to represent values below and above the $100 threshold. Account balances of $500 and $2,000 are used to represent values below and above the $1,000 threshold.
+
+Expected fees are calculated using the Assignment 2 business logic specification:
+
+$$\text{Expected Fee} = \text{Amount} \times \frac{\text{Specified Fee Percentage}}{100}$$
 
 #### Student Test Cases
 
-| Test ID | Basis Path | Student | Amount ($) | From Balance ($) | To Balance ($) | Expected Fee ($) |
-|---|---|---|---|---|---|---|
-| T1 | P1 | True | | | | |
-| T2 | P2 | True | | | | |
-| T3 | P3 | True | | | | |
-| T4 | P4 | True | | | | |
-| T5 | P5 | True | | | | |
-| T6 | P6 | True | | | | |
-| T7 | P7 | True | | | | |
-| T8 | P8 | True | | | | |
+| Test ID | Basis Path | Student | Amount ($) | From Balance ($) | To Balance ($) | Expected Rate | Expected Fee ($) |
+|---|---|---|---|---|---|---|---|
+| T1 | P1 | True | 50 | 500 | 500 | 0.1% | 0.05 |
+| T2 | P2 | True | 50 | 500 | 2000 | 0.05% | 0.025 |
+| T3 | P3 | True | 50 | 2000 | 500 | 0.5% | 0.25 |
+| T4 | P4 | True | 50 | 2000 | 2000 | 0.25% | 0.125 |
+| T5 | P5 | True | 200 | 500 | 500 | 0.05% | 0.10 |
+| T6 | P6 | True | 200 | 500 | 2000 | 0.025% | 0.05 |
+| T7 | P7 | True | 200 | 2000 | 500 | 0.25% | 0.50 |
+| T8 | P8 | True | 200 | 2000 | 2000 | 0.125% | 0.25 |
 
 #### Non-Student Test Cases
 
-| Test ID | Basis Path | Student | Amount ($) | From Balance ($) | To Balance ($) | Expected Fee ($) |
-|---|---|---|---|---|---|---|
-| T9 | P9 | False | | | | |
-| T10 | P10 | False | | | | |
-| T11 | P11 | False | | | | |
-| T12 | P12 | False | | | | |
-| T13 | P13 | False | | | | |
-| T14 | P14 | False | | | | |
-| T15 | P15 | False | | | | |
-| T16 | P16 | False | | | | |
+| Test ID | Basis Path | Student | Amount ($) | From Balance ($) | To Balance ($) | Expected Rate | Expected Fee ($) |
+|---|---|---|---|---|---|---|---|
+| T9 | P9 | False | | | | | |
+| T10 | P10 | False | | | | | |
+| T11 | P11 | False | | | | | |
+| T12 | P12 | False | | | | | |
+| T13 | P13 | False | | | | | |
+| T14 | P14 | False | | | | | |
+| T15 | P15 | False | | | | | |
+| T16 | P16 | False | | | | | |
+
+#### JUnit Implementation
+
+The transfer test cases are implemented in:
+
+`src/test/java/bank/utils/TransferFeeTest.java`
+
+Parameterized JUnit tests are used to execute each basis path independently. The `@CsvSource` annotation supplies the input parameters and expected fee for each test case.
+
+Each test invokes `calculateTransferFee` directly and compares the returned fee against the expected fee using `assertEquals` with a tolerance of 0.0001.
+
+The basis path identifier is included in the test name and assertion message to maintain traceability between the CFG, basis path table, test-case table and test results.
 
 ### 3.4 Test Results
 
-The test cases are executed as JUnit tests against the existing implementation of `calculateTransferFee`.
+The test cases are to be executed as parameterized JUnit tests against the existing implementation of `calculateTransferFee`.
+
+Each test case passes if the actual fee matches the expected fee within the specified tolerance and fails otherwise.
+
+#### Student Test Results
 
 | Test ID | Basis Path | Expected Fee ($) | Actual Fee ($) | Result |
 |---|---|---|---|---|
-| T1 | P1 | | | |
-| T2 | P2 | | | |
-| T3 | P3 | | | |
-| T4 | P4 | | | |
-| T5 | P5 | | | |
-| T6 | P6 | | | |
-| T7 | P7 | | | |
-| T8 | P8 | | | |
-| T9 | P9 | | | |
-| T10 | P10 | | | |
-| T11 | P11 | | | |
-| T12 | P12 | | | |
-| T13 | P13 | | | |
-| T14 | P14 | | | |
-| T15 | P15 | | | |
-| T16 | P16 | | | |
+| T1 | P1 | 0.05 | TBD | TBD |
+| T2 | P2 | 0.025 | TBD | TBD |
+| T3 | P3 | 0.25 | TBD | TBD |
+| T4 | P4 | 0.125 | TBD | TBD |
+| T5 | P5 | 0.10 | TBD | TBD |
+| T6 | P6 | 0.05 | TBD | TBD |
+| T7 | P7 | 0.50 | TBD | TBD |
+| T8 | P8 | 0.25 | TBD | TBD |
+
+#### Non-Student Test Results
+
+| Test ID | Basis Path | Expected Fee ($) | Actual Fee ($) | Result |
+|---|---|---|---|---|
+| T9 | P9 | TBD | TBD | TBD |
+| T10 | P10 | TBD | TBD | TBD |
+| T11 | P11 | TBD | TBD | TBD |
+| T12 | P12 | TBD | TBD | TBD |
+| T13 | P13 | TBD | TBD | TBD |
+| T14 | P14 | TBD | TBD | TBD |
+| T15 | P15 | TBD | TBD | TBD |
+| T16 | P16 | TBD | TBD | TBD |
 
 #### Test Summary
 
-- Total tests executed: TBD
-- Tests passed: TBD
-- Tests failed: TBD
+| Metric | Student | Non-Student | Total |
+|---|---|---|---|
+| Planned test cases | 8 | 8 | 16 |
+| Tests executed | TBD | TBD | TBD |
+| Tests passed | TBD | TBD | TBD |
+| Tests failed | TBD | TBD | TBD |
 
 #### JaCoCo Coverage
 
-The following coverage metrics are obtained from the JaCoCo report generated by the CI workflow for `calculateTransferFee`.
+The selected basis paths are designed to achieve complete node and edge coverage of the transfer CFG.
+
+The following measured coverage metrics will be obtained from the JaCoCo report generated by the CI workflow for `calculateTransferFee`.
 
 | Coverage Metric | Result |
 |---|---|
@@ -182,7 +217,9 @@ The following coverage metrics are obtained from the JaCoCo report generated by 
 
 ### 3.5 Fault Localization
 
-Failing test cases are analyzed to identify discrepancies between the implemented behaviour and the expected behaviour defined in the specification. Test cases that expose the same fault are grouped together.
+Failing test cases are analyzed to identify discrepancies between the implemented behaviour and the expected behaviour defined in the specification.
+
+Test cases that expose the same underlying fault are grouped together. Each identified fault is associated with the corresponding class, method, faulty statement or condition, and a justification explaining the observed failure.
 
 | Fault ID | Failed Test Cases | Class | Method | Faulty Statement or Condition | Justification |
 |---|---|---|---|---|---|
