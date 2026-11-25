@@ -12,7 +12,6 @@
 
 ### 1.5 Fault Localization
 
-
 ## 2. Deposit — DU-Path Testing
 
 ### 2.1 Process and Assumptions
@@ -24,7 +23,6 @@
 ### 2.4 Test Results
 
 ### 2.5 Fault Localization
-
 
 ## 3. Transfer — Basis Path Testing
 
@@ -187,24 +185,26 @@ All eight student test cases were executed locally on November 25, 2026. All eig
 
 | Test ID | Basis Path | Expected Fee ($) | Actual Fee ($) | Result |
 |---|---|---|---|---|
-| T9 | P9 | 0.10 | TBD | TBD |
-| T10 | P10 | 0.05 | TBD | TBD |
-| T11 | P11 | 0.50 | TBD | TBD |
-| T12 | P12 | 0.25 | TBD | TBD |
-| T13 | P13 | 0.20 | TBD | TBD |
-| T14 | P14 | 0.10 | TBD | TBD |
-| T15 | P15 | 1.00 | TBD | TBD |
-| T16 | P16 | 0.50 | TBD | TBD |
+| T9 | P9 | 0.10 | 1.00 | Fail |
+| T10 | P10 | 0.05 | 0.50 | Fail |
+| T11 | P11 | 0.50 | 5.00 | Fail |
+| T12 | P12 | 0.25 | 2.50 | Fail |
+| T13 | P13 | 0.20 | 2.00 | Fail |
+| T14 | P14 | 0.10 | 1.00 | Fail |
+| T15 | P15 | 1.00 | 10.00 | Fail |
+| T16 | P16 | 0.50 | 11.00 | Fail |
+
+All eight non-student test cases also failed locally. T9–T15 returned ten times the expected fee, and T16 returned 22 times the expected fee.
 
 #### Test Summary
 
 | Metric | Student | Non-Student | Total |
 |---|---|---|---|
 | Planned test cases | 8 | 8 | 16 |
-| Tests executed | 8 | TBD | TBD |
-| Tests passed | 0 | TBD | TBD |
-| Tests failed | 8 | TBD | TBD |
-| Execution errors | 0 | TBD | TBD |
+| Tests executed | 8 | 8 | 16 |
+| Tests passed | 0 | 0 | 0 |
+| Tests failed | 8 | 8 | 16 |
+| Execution errors | 0 | 0 | 0 |
 
 #### JaCoCo Coverage
 
@@ -220,17 +220,16 @@ The following measured coverage metrics will be obtained from the JaCoCo report 
 
 ### 3.5 Fault Localization
 
-Failing test cases are analyzed to identify discrepancies between the implemented behaviour and the expected behaviour defined in the specification.
+All 16 transfer test cases failed. T1–T15 returned fees ten times the expected fee, while T16 returned a fee 22 times the expected fee.
 
-Test cases that expose the same underlying fault are grouped together. Each identified fault is associated with the corresponding class, method, faulty statement or condition, and a justification explaining the observed failure.
-
-All eight student test cases returned fees ten times greater than expected. This discrepancy was localized to the fee percentage assignment statements rather than the conditional statements or the final fee calculation.
+The faults were localized to the fee percentage assignment statements.
 
 | Fault ID | Failed Test Cases | Class | Method | Faulty Statement or Condition | Justification |
 |---|---|---|---|---|---|
-| TR-F1 | T1–T8 | FeesCalculator | calculateTransferFee | Student fee percentage assignments at nodes 6, 7, 9, 10, 13, 14, 16 and 17 | Each assigned fee multiplier is ten times the multiplier required by the specification, causing the calculated fee to be ten times the expected fee. |
+| TR-F1 | T1–T15 | FeesCalculator | calculateTransferFee | Fee percentage assignments at nodes 6, 7, 9, 10, 13, 14, 16, 17, 21, 22, 24, 25, 28, 29 and 31 | The assigned multipliers are ten times the values required by the specification. |
+| TR-F2 | T16 | FeesCalculator | calculateTransferFee | Node 32: feePercentage = 0.055 | The assigned multiplier is 0.055 instead of 0.0025, resulting in a fee 22 times greater than expected. |
 
-#### Incorrect Student Fee Multipliers
+#### Incorrect Fee Multipliers
 
 | Test Case | CFG Node | Implemented Multiplier | Expected Multiplier |
 |---|---|---|---|
@@ -242,9 +241,15 @@ All eight student test cases returned fees ten times greater than expected. This
 | T6 | 14 | 0.0025 | 0.00025 |
 | T7 | 16 | 0.025 | 0.0025 |
 | T8 | 17 | 0.0125 | 0.00125 |
+| T9 | 21 | 0.02 | 0.002 |
+| T10 | 22 | 0.01 | 0.001 |
+| T11 | 24 | 0.1 | 0.01 |
+| T12 | 25 | 0.05 | 0.005 |
+| T13 | 28 | 0.01 | 0.001 |
+| T14 | 29 | 0.005 | 0.0005 |
+| T15 | 31 | 0.05 | 0.005 |
+| T16 | 32 | 0.055 | 0.0025 |
 
-The eight incorrect assignments are grouped under one fault category because they exhibit the same systematic multiplier discrepancy. Each affected statement is identified separately in the table above.
-
-Non-student fault localization is pending execution of the non-student test cases.
+The first 15 incorrect assignments are grouped by their common factor-of-ten discrepancy. Node 32 is listed separately because its multiplier differs from the specification by a factor of 22. The grouping describes the observed fault patterns; each affected assignment is identified separately.
 
 No modifications are made to the original implementation.
