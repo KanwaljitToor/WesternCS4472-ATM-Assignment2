@@ -141,14 +141,14 @@ $$\text{Expected Fee} = \text{Amount} \times \frac{\text{Specified Fee Percentag
 
 | Test ID | Basis Path | Student | Amount ($) | From Balance ($) | To Balance ($) | Expected Rate | Expected Fee ($) |
 |---|---|---|---|---|---|---|---|
-| T9 | P9 | False | | | | | |
-| T10 | P10 | False | | | | | |
-| T11 | P11 | False | | | | | |
-| T12 | P12 | False | | | | | |
-| T13 | P13 | False | | | | | |
-| T14 | P14 | False | | | | | |
-| T15 | P15 | False | | | | | |
-| T16 | P16 | False | | | | | |
+| T9 | P9 | False | 50 | 500 | 500 | 0.2% | 0.10 |
+| T10 | P10 | False | 50 | 500 | 2000 | 0.1% | 0.05 |
+| T11 | P11 | False | 50 | 2000 | 500 | 1% | 0.50 |
+| T12 | P12 | False | 50 | 2000 | 2000 | 0.5% | 0.25 |
+| T13 | P13 | False | 200 | 500 | 500 | 0.1% | 0.20 |
+| T14 | P14 | False | 200 | 500 | 2000 | 0.05% | 0.10 |
+| T15 | P15 | False | 200 | 2000 | 500 | 0.5% | 1.00 |
+| T16 | P16 | False | 200 | 2000 | 2000 | 0.25% | 0.50 |
 
 #### JUnit Implementation
 
@@ -164,7 +164,7 @@ The basis path identifier is included in the test name and assertion message to 
 
 ### 3.4 Test Results
 
-The test cases are to be executed as parameterized JUnit tests against the existing implementation of `calculateTransferFee`.
+The test cases are executed as parameterized JUnit tests against the existing implementation of `calculateTransferFee`.
 
 Each test case passes if the actual fee matches the expected fee within the specified tolerance and fails otherwise.
 
@@ -172,36 +172,39 @@ Each test case passes if the actual fee matches the expected fee within the spec
 
 | Test ID | Basis Path | Expected Fee ($) | Actual Fee ($) | Result |
 |---|---|---|---|---|
-| T1 | P1 | 0.05 | TBD | TBD |
-| T2 | P2 | 0.025 | TBD | TBD |
-| T3 | P3 | 0.25 | TBD | TBD |
-| T4 | P4 | 0.125 | TBD | TBD |
-| T5 | P5 | 0.10 | TBD | TBD |
-| T6 | P6 | 0.05 | TBD | TBD |
-| T7 | P7 | 0.50 | TBD | TBD |
-| T8 | P8 | 0.25 | TBD | TBD |
+| T1 | P1 | 0.05 | 0.50 | Fail |
+| T2 | P2 | 0.025 | 0.25 | Fail |
+| T3 | P3 | 0.25 | 2.50 | Fail |
+| T4 | P4 | 0.125 | 1.25 | Fail |
+| T5 | P5 | 0.10 | 1.00 | Fail |
+| T6 | P6 | 0.05 | 0.50 | Fail |
+| T7 | P7 | 0.50 | 5.00 | Fail |
+| T8 | P8 | 0.25 | 2.50 | Fail |
+
+All eight student test cases were executed locally on November 25, 2026. All eight failed, with no execution errors. In each case, the actual fee was ten times the expected fee.
 
 #### Non-Student Test Results
 
 | Test ID | Basis Path | Expected Fee ($) | Actual Fee ($) | Result |
 |---|---|---|---|---|
-| T9 | P9 | TBD | TBD | TBD |
-| T10 | P10 | TBD | TBD | TBD |
-| T11 | P11 | TBD | TBD | TBD |
-| T12 | P12 | TBD | TBD | TBD |
-| T13 | P13 | TBD | TBD | TBD |
-| T14 | P14 | TBD | TBD | TBD |
-| T15 | P15 | TBD | TBD | TBD |
-| T16 | P16 | TBD | TBD | TBD |
+| T9 | P9 | 0.10 | TBD | TBD |
+| T10 | P10 | 0.05 | TBD | TBD |
+| T11 | P11 | 0.50 | TBD | TBD |
+| T12 | P12 | 0.25 | TBD | TBD |
+| T13 | P13 | 0.20 | TBD | TBD |
+| T14 | P14 | 0.10 | TBD | TBD |
+| T15 | P15 | 1.00 | TBD | TBD |
+| T16 | P16 | 0.50 | TBD | TBD |
 
 #### Test Summary
 
 | Metric | Student | Non-Student | Total |
 |---|---|---|---|
 | Planned test cases | 8 | 8 | 16 |
-| Tests executed | TBD | TBD | TBD |
-| Tests passed | TBD | TBD | TBD |
-| Tests failed | TBD | TBD | TBD |
+| Tests executed | 8 | TBD | TBD |
+| Tests passed | 0 | TBD | TBD |
+| Tests failed | 8 | TBD | TBD |
+| Execution errors | 0 | TBD | TBD |
 
 #### JaCoCo Coverage
 
@@ -221,8 +224,27 @@ Failing test cases are analyzed to identify discrepancies between the implemente
 
 Test cases that expose the same underlying fault are grouped together. Each identified fault is associated with the corresponding class, method, faulty statement or condition, and a justification explaining the observed failure.
 
+All eight student test cases returned fees ten times greater than expected. This discrepancy was localized to the fee percentage assignment statements rather than the conditional statements or the final fee calculation.
+
 | Fault ID | Failed Test Cases | Class | Method | Faulty Statement or Condition | Justification |
 |---|---|---|---|---|---|
-| | | | | | |
+| TR-F1 | T1–T8 | FeesCalculator | calculateTransferFee | Student fee percentage assignments at nodes 6, 7, 9, 10, 13, 14, 16 and 17 | Each assigned fee multiplier is ten times the multiplier required by the specification, causing the calculated fee to be ten times the expected fee. |
+
+#### Incorrect Student Fee Multipliers
+
+| Test Case | CFG Node | Implemented Multiplier | Expected Multiplier |
+|---|---|---|---|
+| T1 | 6 | 0.01 | 0.001 |
+| T2 | 7 | 0.005 | 0.0005 |
+| T3 | 9 | 0.05 | 0.005 |
+| T4 | 10 | 0.025 | 0.0025 |
+| T5 | 13 | 0.005 | 0.0005 |
+| T6 | 14 | 0.0025 | 0.00025 |
+| T7 | 16 | 0.025 | 0.0025 |
+| T8 | 17 | 0.0125 | 0.00125 |
+
+The eight incorrect assignments are grouped under one fault category because they exhibit the same systematic multiplier discrepancy. Each affected statement is identified separately in the table above.
+
+Non-student fault localization is pending execution of the non-student test cases.
 
 No modifications are made to the original implementation.

@@ -1,7 +1,6 @@
 package bank.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -33,19 +32,16 @@ public class TransferFeeTest {
     }
 
     // Non-student transfer fee tests (P9-P16)
-    // TODO: Replace placeholder values with actual test data.
-    // TODO: Remove @Disabled once test data is complete.
-    @Disabled("Pending non-student test data")
     @ParameterizedTest(name = "{0}")
     @CsvSource({
-        "P9, 0, 0, 0, 0",
-        "P10, 0, 0, 0, 0",
-        "P11, 0, 0, 0, 0",
-        "P12, 0, 0, 0, 0",
-        "P13, 0, 0, 0, 0",
-        "P14, 0, 0, 0, 0",
-        "P15, 0, 0, 0, 0",
-        "P16, 0, 0, 0, 0"
+        "P9, 50, 500, 500, 0.1",
+        "P10, 50, 500, 2000, 0.05",
+        "P11, 50, 2000, 500, 0.5",
+        "P12, 50, 2000, 2000, 0.25",
+        "P13, 200, 500, 500, 0.2",
+        "P14, 200, 500, 2000, 0.1",
+        "P15, 200, 2000, 500, 1.0",
+        "P16, 200, 2000, 2000, 0.5"
     })
     public void testNonStudentTransferFees(
         String pathId,
